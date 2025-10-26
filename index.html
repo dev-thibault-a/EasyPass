@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>🔐 EasyPass</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            margin: 0;
+            background: #0f172a;
+            color: #f1f5f9;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        main {
+            max-width: 400px;
+            margin: 2rem auto 1rem auto;
+            background: #1e293b;
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 8px #0002;
+            padding: 2rem;
+        }
+        h1 { font-size: 1.5rem; text-align: center; margin-bottom: 1.2rem; }
+        .field { display: flex; align-items: center; margin-bottom: 1.2rem; }
+        #passwordInput {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            font-size: 1.15rem;
+            border-radius: 0.8rem 0 0 0.8rem;
+            border: none;
+            background: #334155;
+            color: inherit;
+        }
+        #toggleBtn {
+            font-size: 1.3rem;
+            background: #334155;
+            color: #94a3b8;
+            border: none;
+            border-radius: 0 0.8rem 0.8rem 0;
+            padding: 0.7rem 1rem;
+            cursor: pointer;
+        }
+        #progressBar {
+            width: 100%;
+            height: 14px;
+            border-radius: 0.7rem;
+            background: #334155;
+            margin: 1rem 0 0.6rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        #progressInner {
+            height: 100%;
+            border-radius: inherit;
+            transition: width 0.3s;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.4em 1em;
+            font-size: 1.08rem;
+            border-radius: 2em;
+            margin-bottom: 1rem;
+        }
+        #criteriaList, #tipsList {
+            list-style: none;
+            padding: 0;
+        }
+        #criteriaList li, #tipsList li {
+            margin: 0.4em 0;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+        #criteriaList .met {
+            color: #10b981;
+        }
+        #criteriaList .not-met {
+            color: #ef4444;
+        }
+        #tipsCard {
+            margin-top: 1.3rem;
+            background: #334155;
+            border-radius: 0.6rem;
+            padding: 1rem;
+        }
+        #generateBtn {
+            margin-top: 1rem;
+            background: linear-gradient(90deg,#10b981,#f59e0b);
+            color: #fff;
+            padding: 0.7rem 1.6rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: filter 0.2s;
+        }
+        #generateBtn:hover { filter: brightness(1.2); }
+        #generatedPasswordContainer {
+            text-align: center;
+            margin-top: 0.8rem;
+        }
+        #generatedPassword {
+            background: #334155;
+            color: #f1f5f9;
+            border-radius: 0.5rem;
+            font-size: 1.06rem;
+            padding: 0.4rem 1rem;
+            margin: 0.2rem 0;
+        }
+        #copyBtn {
+            background: #10b981;
+            color: #fff;
+            padding: 0.3rem 0.7rem;
+            border: none;
+            border-radius: 0.4rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .metrics {
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.97rem;
+            margin: 1.2rem 0;
+        }
+        footer {
+            padding: 1rem;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            background: transparent;
+        }
+        .footer-links a {
+            color: #10b981;
+            margin: 0 0.5em;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .footer-links a.github {
+            color: #3b82f6;
+        }
+        .footer-links a.easynetworks {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>🔐 EasyPass</h1>
+        <div class="field">
+            <input id="passwordInput" type="password" placeholder="Entrez votre mot de passe...">
+            <button id="toggleBtn" type="button">👁️</button>
+        </div>
+        <div id="progressBar"><div id="progressInner" style="width:0;background:#ef4444"></div></div>
+        <div id="strengthBadge" class="badge" style="background:#ef4444">🔴 Faible</div>
+        <div class="metrics">
+            <span id="scoreValue">0/100</span>
+            <span id="crackTime">&lt; 1 seconde</span>
+            <span id="entropy">0 bits</span>
+        </div>
+        <ul id="criteriaList"></ul>
+        <div id="tipsCard">
+            <strong>Conseils :</strong>
+            <ul id="tipsList"></ul>
+        </div>
+        <div style="margin-top:2rem;">
+            <label>Longueur : <span id="lengthValue">12</span></label><br>
+            <input id="lengthSlider" type="range" min="8" max="32" value="12">
+            <div>
+                <label><input type="checkbox" id="includeLowercase" checked/> minuscules</label>
+                <label><input type="checkbox" id="includeUppercase" checked/> majuscules</label>
+                <label><input type="checkbox" id="includeNumbers" checked/> chiffres</label>
+                <label><input type="checkbox" id="includeSpecial" checked/> spéciaux</label>
+            </div>
+            <button id="generateBtn">🎲 Générer un mot de passe fort</button>
+            <div id="generatedPasswordContainer">
+                <span id="generatedPassword"></span>
+                <button id="copyBtn" style="display:none;">📋 Copier</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bouton d'installation PWA -->
+    <div id="installContainer" style="text-align:center; margin-bottom:1rem;">
+        <button id="installBtn" style="
+            background: linear-gradient(90deg,#10b981,#f59e0b);
+            color: #fff;
+            padding: 0.7rem 1.6rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: filter 0.2s;
+            display: none;">
+            📲 Installer EasyPass
+        </button>
+        <div id="installHelp" style="color:#94a3b8; font-size:0.95rem; margin-top:0.5em;">
+            Ajoute EasyPass à ton appareil pour l’utiliser comme une application mobile ou desktop.
+        </div>
+    </div>
+
+    <footer>
+        EasyPass • Crée par Thibault A. – Application Open source<br>
+        <span class="footer-links">
+            <a href="https://www.linkedin.com/in/thibault-lefebvre-299a0ba7" target="_blank">LinkedIn</a>
+            <a href="https://easynetworks.vercel.app" target="_blank" class="easynetworks">EasyNetworks</a>
+            <a href="https://github.com/thibault-a" target="_blank" class="github">GitHub</a>
+        </span>
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>
